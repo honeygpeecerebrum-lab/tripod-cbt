@@ -89,4 +89,4 @@ if(!q || options.includes('') || isNaN(answer)){ alert('Fill all fields correctl
 
 questions.push({ q, options, answer }); localStorage.setItem('questions', JSON.stringify(questions)); alert('Question saved permanently!');
 
-document.getElementById('questionInput').value = ''; document.getElementById('option1').value = ''; document.getElementById('option2').value = ''; document.getElementById('option3').value = ''; document.getElementById('option4').value = ''; document.getElementById('correctIndex').value = ''; } </script></body></html> 
+document.getElementById('questionInput').value = ''; document.getElementById('option1').value = ''; document.getElementById('option2').value = ''; document.getElementById('option3').value = ''; document.getElementById('option4').value = ''; document.getElementById('correctIndex').value = ''; } </script></body></html>
