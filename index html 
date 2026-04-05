@@ -144,4 +144,4 @@ function addQuestion(){
   document.getElementById('questionInput').value=''; document.getElementById('option1').value=''; document.getElementById('option2').value=''; document.getElementById('option3').value=''; document.getElementById('option4').value=''; document.getElementById('correctIndex').value='';
 }
 </script></body>
-</html>
+</html> 
