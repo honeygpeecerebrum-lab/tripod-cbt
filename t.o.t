@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIPOD ONLINE TUTORIAL</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background-color: #eef4ff; font-family: 'Inter', sans-serif; }
+  .card { background-color: #ffffff; border-radius: 1.2rem; box-shadow: 0 12px 25px rgba(0,0,0,0.08); padding: 1.5rem; }
+  .option { transition: all 0.2s ease; }
+  .option:hover { background-color: #dbeafe; cursor: pointer; transform: scale(1.02); }
+</style>
+</head>
+<body class="min-h-screen flex flex-col items-center"><!-- Header --><div class="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white p-4 text-center font-bold text-lg shadow">
+  TRIPOD ONLINE TUTORIAL CBT
+</div><!-- Landing Section --><div id="landing" class="text-center space-y-6 mt-16 w-full max-w-md">
+  <h1 class="text-4xl font-extrabold text-blue-700">Welcome</h1>
+  <p class="text-gray-600">Enter your details to start</p>  <input id="studentName" placeholder="Enter your name" class="w-full p-3 border rounded-xl" />
+  <input id="studentNumber" placeholder="Enter your number" class="w-full p-3 border rounded-xl" />  <div class="space-x-3">
+    <button onclick="startTest()" class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">Start Test</button>
+    <button onclick="adminLogin()" class="px-6 py-3 bg-gray-800 text-white rounded-xl shadow hover:bg-gray-900 transition">Admin Login</button>
+  </div>
+</div><!-- Test Section --><div id="testSection" class="hidden w-full max-w-xl mt-10">
+  <div class="card space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 id="questionText" class="text-lg font-semibold text-gray-800"></h2>
+      <span id="timer" class="text-red-500 font-bold">05:00</span>
+    </div>
+    <p id="progress" class="text-sm text-gray-400"></p>
+    <div id="options" class="space-y-3"></div>
+    <div class="flex justify-between mt-4">
+      <button onclick="prevQuestion()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Previous</button>
+      <button onclick="nextQuestion()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">Next</button>
+    </div>
+  </div>
+</div><!-- Result Section --><div id="resultSection" class="hidden text-center space-y-6 mt-10">
+  <h1 class="text-3xl font-bold text-blue-700">Your Score</h1>
+  <p id="scoreText" class="text-gray-700 text-xl"></p>
+  <p id="studentInfo" class="text-gray-500"></p>
+  <button onclick="restartTest()" class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">Restart Test</button>
+</div><!-- Admin Panel --><div id="adminPanel" class="hidden w-full max-w-xl mt-10">
+  <div class="card space-y-3">
+    <h2 class="text-xl font-bold text-gray-800">Admin Panel - Add Question</h2>
+    <textarea id="questionInput" class="w-full p-2 border rounded-lg" placeholder="Enter question"></textarea>
+    <input id="option1" class="w-full p-2 border rounded-lg" placeholder="Option 1">
+    <input id="option2" class="w-full p-2 border rounded-lg" placeholder="Option 2">
+    <input id="option3" class="w-full p-2 border rounded-lg" placeholder="Option 3">
+    <input id="option4" class="w-full p-2 border rounded-lg" placeholder="Option 4">
+    <input id="correctIndex" class="w-full p-2 border rounded-lg" placeholder="Correct option index (0-3)">
+    <button onclick="addQuestion()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">Add Question</button>
+  </div>
+</div><script>
+// Load saved questions
+let questions = JSON.parse(localStorage.getItem('questions')) || [
+  { q: 'What is the chemical symbol for water?', options: ['H2O','CO2','NaCl','O2'], answer: 0 },
+  { q: 'Which planet is known as the Red Planet?', options: ['Earth','Mars','Jupiter','Venus'], answer: 1 }
+];let current = 0; let userAnswers = []; let timerInterval; let timeLeft = 300; let studentName = ''; let studentNumber = '';
+
+function startTest(){ studentName = document.getElementById('studentName').value; studentNumber = document.getElementById('studentNumber').value;
+
+if(!studentName || !studentNumber){ alert('Please enter your name and number'); return; }
+
+document.getElementById('landing').classList.add('hidden'); document.getElementById('testSection').classList.remove('hidden'); showQuestion(); startTimer(); }
+
+function showQuestion(){ const q = questions[current]; document.getElementById('questionText').innerText = q.q; document.getElementById('progress').innerText = Question ${current + 1} of ${questions.length};
+
+const optionsDiv = document.getElementById('options'); optionsDiv.innerHTML = ''; q.options.forEach((opt, i) => { const btn = document.createElement('button'); btn.innerText = opt; btn.className = 'option w-full text-left px-4 py-3 border rounded-xl bg-white shadow-sm'; btn.onclick = () => selectAnswer(i); if(userAnswers[current] === i) btn.style.backgroundColor = '#bfdbfe'; optionsDiv.appendChild(btn); }); }
+
+function selectAnswer(i){ userAnswers[current] = i; showQuestion(); }
+
+function nextQuestion(){ if(current < questions.length -1) current++; else showResult(); showQuestion(); }
+
+function prevQuestion(){ if(current > 0) current--; showQuestion(); }
+
+function showResult(){ document.getElementById('testSection').classList.add('hidden'); document.getElementById('resultSection').classList.remove('hidden'); clearInterval(timerInterval);
+
+let score = 0; userAnswers.forEach((ans,i) => { if(ans === questions[i].answer) score++; });
+
+document.getElementById('scoreText').innerText = ${score} / ${questions.length}; document.getElementById('studentInfo').innerText = ${studentName} (${studentNumber}); }
+
+function restartTest(){ current = 0; userAnswers = []; timeLeft = 300; document.getElementById('resultSection').classList.add('hidden'); document.getElementById('landing').classList.remove('hidden'); }
+
+function startTimer(){ timerInterval = setInterval(()=>{ if(timeLeft <= 0){ showResult(); } else { timeLeft--; const min = Math.floor(timeLeft / 60).toString().padStart(2,'0'); const sec = (timeLeft % 60).toString().padStart(2,'0'); document.getElementById('timer').innerText = ${min}:${sec}; } },1000); }
+
+function adminLogin(){ const user = prompt('Username:'); const pass = prompt('Password:'); if(user === 'Dr cerebrum' && pass === 'Tripod'){ document.getElementById('adminPanel').classList.remove('hidden'); alert('Welcome Admin'); } else { alert('Wrong login'); } }
+
+function addQuestion(){ const q = document.getElementById('questionInput').value; const options = [ document.getElementById('option1').value, document.getElementById('option2').value, document.getElementById('option3').value, document.getElementById('option4').value ]; const answer = parseInt(document.getElementById('correctIndex').value);
+
+if(!q || options.includes('') || isNaN(answer)){ alert('Fill all fields correctly'); return; }
+
+questions.push({ q, options, answer }); localStorage.setItem('questions', JSON.stringify(questions)); alert('Question saved permanently!');
+
+document.getElementById('questionInput').value = ''; document.getElementById('option1').value = ''; document.getElementById('option2').value = ''; document.getElementById('option3').value = ''; document.getElementById('option4').value = ''; document.getElementById('correctIndex').value = ''; } </script></body></html>
