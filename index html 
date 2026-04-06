@@ -57,4 +57,4 @@ body { background-color: #eef4ff; font-family: 'Inter', sans-serif; }
     <div id="options" class="space-y-3"></div>
     <div class="flex justify-between mt-4">
       <button onclick="prevQuestion()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Previous</button>
-      <button onclick="nextQuestion()" class="px-
+      <button onclick="nextQuestion()" class="px- 
