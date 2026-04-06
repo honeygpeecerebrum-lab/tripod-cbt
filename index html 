@@ -1,60 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRIPOD ONLINE TUTORIAL</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<title>Tripod Online Tutorial CBT</title>
 <style>
-body { background-color: #eef4ff; font-family: 'Inter', sans-serif; }
-.card { background-color: #fff; border-radius: 1.2rem; box-shadow: 0 12px 25px rgba(0,0,0,0.08); padding: 1.5rem; }
-.option { transition: all 0.2s ease; }
-.option:hover { background-color: #dbeafe; cursor: pointer; transform: scale(1.02); }
+body { font-family: Arial; background:#0f172a; color:white; text-align:center; }
+.box { background:#1e293b; padding:20px; margin:30px auto; width:320px; border-radius:10px; }
+input, button { padding:10px; margin:10px; width:90%; }
+button { background:#22c55e; border:none; color:white; cursor:pointer; }
+table { width:100%; color:white; }
 </style>
 </head>
-<body class="min-h-screen flex flex-col items-center">
+<body><div id="intro" class="box">
+<h2>Welcome to TRIPOD ONLINE TUTORIAL 🎓</h2>
+<p>Prepare yourself and click below to begin</p>
+<button onclick="showLogin()">Enter</button>
+</div><div id="login" class="box" style="display:none;">
+<h3>Admin Login</h3>
+<input id="user" placeholder="Username"><br>
+<input id="pass" type="password" placeholder="Password"><br>
+<button onclick="login()">Login</button>
+</div><div id="candidate" class="box" style="display:none;">
+<h3>Candidate Details</h3>
+<input id="name" placeholder="Full Name"><br>
+<input id="phone" placeholder="Phone Number"><br>
+<button onclick="startExam()">Start Exam</button>
+</div><div id="exam" class="box" style="display:none;">
+<h3 id="q"></h3>
+<div id="opts"></div>
+<button onclick="next()">Next</button>
+</div><div id="result" class="box" style="display:none;"></div><div id="leaderboard" class="box" style="display:none;">
+<h3>Leaderboard 🏆</h3>
+<table id="board"></table>
+</div><div id="adminPanel" class="box" style="display:none;">
+<h3>Admin Dashboard</h3>
+<table id="adminTable"></table>
+</div><script>
+const ADMIN = "admin";
+const PASSWORD = "1234";
 
-<div class="w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white p-4 text-center font-bold text-lg shadow">
-  TRIPOD ONLINE TUTORIAL CBT
-</div>
+let candidates = JSON.parse(localStorage.getItem("cbtData")) || [];
 
-<!-- Landing -->
-<div id="landing" class="text-center space-y-6 mt-16 w-full max-w-md">
-  <h1 class="text-4xl font-extrabold text-blue-700">Welcome</h1>
-  <p class="text-gray-600">Enter your test code, name and number</p>
-  <input id="testCode" placeholder="Enter Test Code" class="w-full p-3 border rounded-xl" />
-  <input id="studentName" placeholder="Enter your name" class="w-full p-3 border rounded-xl" />
-  <input id="studentNumber" placeholder="Enter your number" class="w-full p-3 border rounded-xl" />
-  <div class="space-x-3">
-    <button onclick="startTest()" class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">Start Test</button>
-    <button onclick="showAdminLogin()" class="px-6 py-3 bg-gray-800 text-white rounded-xl shadow hover:bg-gray-900 transition">Admin Login</button>
-    <button onclick="resetPlatform()" class="px-6 py-3 bg-red-600 text-white rounded-xl shadow hover:bg-red-700 transition">Reset Platform</button>
-  </div>
-  <p id="codeError" class="text-red-500 font-bold hidden">Code not found</p>
-</div>
+function showLogin(){
+ document.getElementById("intro").style.display="none";
+ document.getElementById("login").style.display="block";
+}
 
-<!-- Admin Login -->
-<div id="adminLoginForm" class="hidden w-full max-w-md mt-10">
-  <div class="card space-y-4">
-    <h2 class="text-xl font-bold text-gray-800">Admin Login</h2>
-    <input id="adminUser" placeholder="Username" class="w-full p-3 border rounded-xl" />
-    <input id="adminPass" type="password" placeholder="Password" class="w-full p-3 border rounded-xl" />
-    <div class="flex justify-between">
-      <button onclick="loginAdmin()" class="px-6 py-3 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">Login</button>
-      <button onclick="hideAdminLogin()" class="px-6 py-3 bg-gray-400 text-white rounded-xl shadow hover:bg-gray-500 transition">Cancel</button>
-    </div>
-  </div>
-</div>
+function login(){
+ let u = user.value;
+ let p = pass.value;
+ if(u===ADMIN && p===PASSWORD){
+  document.getElementById("login").style.display="none";
+  document.getElementById("adminPanel").style.display="block";
+  loadAdmin();
+ } else {
+  document.getElementById("login").style.display="none";
+  document.getElementById("candidate").style.display="block";
+ }
+}
 
-<!-- Test Section -->
-<div id="testSection" class="hidden w-full max-w-xl mt-10">
-  <div class="card space-y-4">
-    <div class="flex justify-between items-center">
-      <h2 id="questionText" class="text-lg font-semibold text-gray-800"></h2>
-      <span id="timer" class="text-red-500 font-bold">05:00</span>
-    </div>
-    <p id="progress" class="text-sm text-gray-400"></p>
-    <div id="options" class="space-y-3"></div>
-    <div class="flex justify-between mt-4">
-      <button onclick="prevQuestion()" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Previous</button>
-      <button onclick="nextQuestion()" class="px- 
+let questions = [
+ {q:"2+2?", o:["2","4","6","8"], a:"4"},
+ {q:"Capital of Nigeria?", o:["Lagos","Abuja","Kano","Ibadan"], a:"Abuja"}
+];
+
+let i=0, score=0, currentName="", currentPhone="";
+
+function startExam(){
+ currentName = name.value;
+ currentPhone = phone.value;
+ if(!currentName || !currentPhone){ alert("Fill details"); return; }
+ document.getElementById("candidate").style.display="none";
+ document.getElementById("exam").style.display="block";
+ loadQ();
+}
+
+function loadQ(){
+ let c = questions[i];
+ q.innerText = c.q;
+ let html="";
+ c.o.forEach(opt=>{
+  html += `<label><input type='radio' name='opt' value='${opt}'> ${opt}</label><br>`;
+ });
+ opts.innerHTML = html;
+}
+
+function next(){
+ let sel = document.querySelector("input[name='opt']:checked");
+ if(!sel){ alert("Select answer"); return; }
+ if(sel.value===questions[i].a) score++;
+ i++;
+ if(i<questions.length){ loadQ(); }
+ else finish();
+}
+
+function finish(){
+ let result = {name:currentName, phone:currentPhone, score:score};
+ candidates.push(result);
+ localStorage.setItem("cbtData", JSON.stringify(candidates));
+
+ document.getElementById("exam").style.display="none";
+ document.getElementById("result").style.display="block";
+ document.getElementById("leaderboard").style.display="block";
+
+ result.innerHTML = `<h2>Finished</h2><p>${currentName}, Score: ${score}</p>`;
+ loadBoard();
+}
+
+function loadBoard(){
+ let sorted = candidates.sort((a,b)=>b.score-a.score);
+ let html = "<tr><th>Name</th><th>Score</th></tr>";
+ sorted.forEach(c=>{
+  html += `<tr><td>${c.name}</td><td>${c.score}</td></tr>`;
+ });
+ board.innerHTML = html;
+}
+
+function loadAdmin(){
+ let html = "<tr><th>Name</th><th>Phone</th><th>Score</th></tr>";
+ candidates.forEach(c=>{
+  html += `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.score}</td></tr>`;
+ });
+ adminTable.innerHTML = html;
+}
+</script></body>
+</html> 
